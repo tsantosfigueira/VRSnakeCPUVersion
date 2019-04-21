@@ -6,30 +6,152 @@ using System.Linq;
 public class Snake : MonoBehaviour
 {
 
+    // Tail Prefab
+    public GameObject tailPrefab;
+    public SpawnFood spawnFood;
+
+    enum currentDirection
+    {
+        left,
+        right,
+        up,
+        down
+    }
+
     Vector2 dir = Vector2.right;
     List<Transform> tail = new List<Transform>();
     bool ate = false;
-
-    // Tail Prefab
-    public GameObject tailPrefab;
+    currentDirection snakeDirection;
+    int currentSnakeX;
+    int currentSnakeY;
 
     void Start()
     {
         // Move the Snake every 300ms
         InvokeRepeating("Move", 0.3f, 0.3f);
+        snakeDirection = currentDirection.right;
+    }
+
+    int currentDistanceToFood(int x, int y)
+    {
+        return Mathf.Abs(spawnFood.foodX - x) + Mathf.Abs(spawnFood.foodY - y);
     }
 
     void Update()
     {
-        // Move in a new Direction?
-        if (Input.GetKey(KeyCode.RightArrow))
-            dir = Vector2.right;
-        else if (Input.GetKey(KeyCode.DownArrow))
-            dir = -Vector2.up;    // '-up' means 'down'
-        else if (Input.GetKey(KeyCode.LeftArrow))
-            dir = -Vector2.right; // '-right' means 'left'
-        else if (Input.GetKey(KeyCode.UpArrow))
-            dir = Vector2.up;
+        currentSnakeX = (int)transform.position.x;
+        currentSnakeY = (int)transform.position.y;
+
+   /*     Debug.DrawLine(new Vector2(currentSnakeX, currentSnakeY), new Vector2(currentSnakeX + 1, currentSnakeY), Color.red);
+        Debug.DrawLine(new Vector2(currentSnakeX, currentSnakeY), new Vector2(currentSnakeX, currentSnakeY + 1), Color.red);
+        Debug.DrawLine(new Vector2(currentSnakeX, currentSnakeY), new Vector2(currentSnakeX, currentSnakeY - 1), Color.red); */
+
+        switch (snakeDirection)
+        {
+            case currentDirection.right:
+                // Move right
+                if (currentDistanceToFood(currentSnakeX + 1, currentSnakeY) < currentDistanceToFood(currentSnakeX, currentSnakeY + 1) &&
+                   currentDistanceToFood(currentSnakeX + 1, currentSnakeY) < currentDistanceToFood(currentSnakeX, currentSnakeY - 1))
+                {
+                    dir = Vector2.right;
+                    snakeDirection = currentDirection.right;
+                }
+
+                // Move Down
+                else if (currentDistanceToFood(currentSnakeX, currentSnakeY - 1) < currentDistanceToFood(currentSnakeX + 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX, currentSnakeY - 1) < currentDistanceToFood(currentSnakeX, currentSnakeY + 1))
+                {
+                    dir = -Vector2.up;
+                    snakeDirection = currentDirection.down;
+                }
+
+                // Move Up
+                else if (currentDistanceToFood(currentSnakeX, currentSnakeY + 1) < currentDistanceToFood(currentSnakeX + 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX, currentSnakeY + 1) < currentDistanceToFood(currentSnakeX, currentSnakeY - 1))
+                {
+                    dir = Vector2.up;
+                    snakeDirection = currentDirection.up;
+                }
+                break;
+
+            case currentDirection.left:
+                // Move left
+                if (currentDistanceToFood(currentSnakeX - 1, currentSnakeY) < currentDistanceToFood(currentSnakeX, currentSnakeY + 1) &&
+                   currentDistanceToFood(currentSnakeX - 1, currentSnakeY) < currentDistanceToFood(currentSnakeX, currentSnakeY - 1))
+                {
+                    dir = Vector2.left;
+                    snakeDirection = currentDirection.left;
+                }
+
+                // Move Up
+                else if (currentDistanceToFood(currentSnakeX, currentSnakeY + 1) < currentDistanceToFood(currentSnakeX - 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX, currentSnakeY + 1) < currentDistanceToFood(currentSnakeX, currentSnakeY - 1))
+                {
+                    dir = Vector2.up;
+                    snakeDirection = currentDirection.up;
+                }
+
+                // Move down
+                else if (currentDistanceToFood(currentSnakeX, currentSnakeY - 1) < currentDistanceToFood(currentSnakeX - 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX, currentSnakeY - 1) < currentDistanceToFood(currentSnakeX, currentSnakeY + 1))
+                {
+                    dir = -Vector2.up;
+                    snakeDirection = currentDirection.down;
+                }
+                break;
+
+            case currentDirection.up:
+                // Move left
+                if (currentDistanceToFood(currentSnakeX - 1, currentSnakeY) < currentDistanceToFood(currentSnakeX, currentSnakeY + 1) &&
+                   currentDistanceToFood(currentSnakeX - 1, currentSnakeY) < currentDistanceToFood(currentSnakeX + 1, currentSnakeY))
+                {
+                    dir = Vector2.left;
+                    snakeDirection = currentDirection.left;
+                }
+
+                // Move Up
+                else if (currentDistanceToFood(currentSnakeX, currentSnakeY + 1) < currentDistanceToFood(currentSnakeX + 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX, currentSnakeY + 1) < currentDistanceToFood(currentSnakeX - 1, currentSnakeY))
+                {
+                    dir = Vector2.up;
+                    snakeDirection = currentDirection.up;
+                }
+
+                // Move right
+                else if (currentDistanceToFood(currentSnakeX + 1, currentSnakeY) < currentDistanceToFood(currentSnakeX - 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX + 1, currentSnakeY) < currentDistanceToFood(currentSnakeX, currentSnakeY + 1))
+                {
+                    dir = Vector2.right;
+                    snakeDirection = currentDirection.right;
+                }
+                break;
+
+            case currentDirection.down:
+                // Move left
+                if (currentDistanceToFood(currentSnakeX - 1, currentSnakeY) < currentDistanceToFood(currentSnakeX + 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX - 1, currentSnakeY) < currentDistanceToFood(currentSnakeX, currentSnakeY - 1))
+                {
+                    dir = Vector2.left;
+                    snakeDirection = currentDirection.left;
+                }
+
+                // Move Down
+                else if (currentDistanceToFood(currentSnakeX, currentSnakeY - 1) < currentDistanceToFood(currentSnakeX + 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX, currentSnakeY - 1) < currentDistanceToFood(currentSnakeX - 1, currentSnakeY))
+                {
+                    dir = -Vector2.up;
+                    snakeDirection = currentDirection.down;
+                }
+
+                // Move right
+                else if (currentDistanceToFood(currentSnakeX + 1, currentSnakeY) < currentDistanceToFood(currentSnakeX - 1, currentSnakeY) &&
+                   currentDistanceToFood(currentSnakeX + 1, currentSnakeY) < currentDistanceToFood(currentSnakeX, currentSnakeY - 1))
+                {
+                    dir = Vector2.right;
+                    snakeDirection = currentDirection.right;
+                }
+                break;
+        }
     }
 
     void Move()
@@ -74,6 +196,8 @@ public class Snake : MonoBehaviour
 
             // Remove the Food
             Destroy(coll.gameObject);
+
+            spawnFood.Spawn();
         }
         // Collided with Tail or Border
         else
@@ -81,4 +205,6 @@ public class Snake : MonoBehaviour
             // ToDo 'You lose' screen
         }
     }
+
+
 }
